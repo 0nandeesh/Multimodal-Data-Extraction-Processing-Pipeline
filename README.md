@@ -40,6 +40,68 @@ streamlit run audio_vedio.py
 python version2.py
 ```
 
+## Detailed Workflows
+
+### app.py - YouTube Transcript Extractor
+```
+1. Input YouTube URL/Video ID
+2. extract_video_id() → validate URL format
+3. fetch_html() → get YouTube watch page
+4. extract_api_key() → find InnerTube API key
+5. fetch_innertube_data() → get video metadata
+6. extract_caption_tracks() → find available captions
+7. select_track() → choose best language track
+8. fetch_transcript_xml() → download captions XML
+9. parse_transcript() → extract text + timestamps
+10. format_text() → create readable transcript
+11. Export as TXT/JSON/CSV
+```
+
+### audio_video.py - VidRipper (Streamlit)
+```
+Playlist Processing:
+1. get_playlist_videos() → extract all video metadata
+2. For each video:
+   - download_audio() → yt-dlp audio extraction
+   - download_video() → yt-dlp video-only download
+   - get_youtube_subs() → official transcript fetch
+   - transcribe_audio_groq() → Whisper V3 transcription
+3. Store files in /downloads directory
+4. Provide download buttons for each file
+
+Channel Processing:
+1. get_channel_videos() → extract channel video list
+2. Same per-video processing as playlist
+3. Batch download management
+
+Local Audio Transcription:
+1. Upload audio file → validate size/format
+2. transcribe_audio_groq() → send to Groq API
+3. Return transcript text
+```
+
+### version2.py - AudioClip Studio (Unified)
+```
+YouTube Processing:
+1. build_transcript() → extract captions (same as app.py)
+2. download_audio_background() → threaded WAV download
+   - progress_hook() → track download progress
+   - Store audio data in server memory
+3. Serve audio file for download/segmentation
+
+Audio Segmentation:
+1. Client uploads audio file → Web Audio API decode
+2. Upload/parse transcript → detect timestamp format
+3. parseTranscriptFile() → support multiple formats:
+   - SRT: 00:01:30,500 --> 00:01:35,000
+   - Simple: [01:30] text
+   - Range: 01:30 - 01:35 text
+4. extractSegments() → slice audio by timestamps
+5. encodeWAV() → create individual WAV files
+6. makeZip() → package all segments
+7. Client-side download management
+```
+
 ## Usage Guide
 
 ### Basic Workflow
